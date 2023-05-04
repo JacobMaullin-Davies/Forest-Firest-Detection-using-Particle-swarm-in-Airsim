@@ -5,6 +5,11 @@ import math
 import os
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from PIL import Image
+from scipy.ndimage import gaussian_filter
 
 class Client(object):
     client: airsim.MultirotorClient
@@ -69,12 +74,9 @@ class Client(object):
     def takedroneimage(self, numId, droneID):
         responses = self.client.simGetImages([
         airsim.ImageRequest("f"+str(numId), airsim.ImageType.Scene)], droneID)
-
-        for i, response in enumerate(responses):
-            #airsim.write_file(os.path.normpath('./images/fire_check_'+str(droneID)+'.png'), response.image_data_uint8)
-            img1d = np.frombuffer(response.image_data_uint8, dtype=np.uint8)
-            img_rgb = img1d.reshape(response.height, response.width, 3)
-            return img_rgb
+        #airsim.write_file(os.path.normpath('./images/fire_check_'+str(droneID)+'.png'), response.image_data_uint8)
+        img = cv2.imdecode(np.frombuffer(responses[0].image_data_uint8, dtype=np.uint8), cv2.IMREAD_COLOR)
+        return img
 
 
     def takedroneimageOrbit(self, count):
@@ -94,12 +96,22 @@ class Client(object):
         return self.client.getDistanceSensorData("Distance1", vehicle_name = id)
 
     def getLidarData(self, id, num):
-        sensor = "LidarSensor" + str(num)
+        sensor = "l" + str(num)
         lidar_data = self.client.getLidarData(sensor, vehicle_name = id)
-        print(len(lidar_data.point_cloud))
         if len(lidar_data.point_cloud) == 0:
             return False
         return True
+
+    def dronePose(self, id):
+
+        pose = self.client.simGetObjectPose(id)
+        # extract the XYZ coordinates from the pose
+        x = pose.position.x_val
+        y = pose.position.y_val
+        z = pose.position.z_val
+
+        # print the XYZ coordinates
+        print("Drone position: ({}, {}, {})".format(x, y, z))
 
 class droneClient(object):
     """docstring for Drone."""
@@ -124,7 +136,63 @@ class droneClient(object):
         print(self.personal_best)
         print(self.current_velocity)
 
-    def velocity_update_explore(self, drone_list, unexplored_points, position_min, position_max, w_min=0.5, max=1.0):
+    def local_search(self):
+        self.best_position = self.position
+
+    def fitness_calculation(self, target, radius):
+        dist = np.linalg.norm(self.position - target) # Euclidean distance to target
+        dist_from_edge = dist - radius # distance from edge of circle
+        self.fitness = max(dist_from_edge, 0) # s
+        if self.best_fitness != None:
+            if self.fitness < self.best_fitness:
+                self.best_position = self.position
+                self.best_fitness = self.fitness
+        else:
+            self.best_fitness = self.fitness
+
+    def velocity_update(self, drone_list, gbest_position, lidar_check, w_min=0.5, max=1.0, c=0.1):
+        # Randomly generate r1, r2 and inertia weight from normal distribution
+        collision_dist = 5
+        r1 = random.uniform(0,max)
+        r2 = random.uniform(0,max)
+        w = random.uniform(w_min,max)
+        c1 = c
+        c2 = c
+
+        avoidance_velocity = [0,0,0]
+        for drone in drone_list:
+            if drone.droneNumID != self.droneNumID:
+                dist = np.linalg.norm(self.position - drone.position)
+                if dist < collision_dist:
+                    repulsive_force = (self.position - drone.position) / dist**2
+                    avoidance_velocity += repulsive_force # add avoidance velocity to total
+
+            new_velocity = []
+            for i in range(len(self.velocity)):
+                if i == 2:
+                    new_velocity_i = w * self.velocity[i] + c1 * r1 * (self.best_position[i] - self.position[i]) \
+                    + c2 * r2 * (gbest_position[i] - self.position[i]) + avoidance_velocity[i]
+                else:
+                    new_velocity_i = w * self.velocity[i] + c1 * r1 * (self.best_position[i] - self.position[i]) \
+                    + c2 * r2 * (gbest_position[i] - self.position[i]) + avoidance_velocity[i] + random.uniform(-0.1, 0.1)
+
+                new_velocity.append(new_velocity_i)
+
+            estimate = self.position + new_velocity
+
+
+            if estimate[2] > -55:
+                new_velocity[2] -= random.uniform(0.5, 1)
+
+            if lidar_check:
+                new_velocity[2] -= 2
+            else:
+                if estimate[2] < -60:
+                    new_velocity[2] += random.uniform(0.5, 1)
+
+        self.velocity = new_velocity
+
+    def velocity_update_explore(self, drone_list, unexplored_points, position_min, position_max, lidar_check, w_min=0.5, max=1.0):
         # Randomly generate r1, r2 and inertia weight from normal distribution
         collision_dist = 5
         r1 = random.uniform(0.5,max)
@@ -145,8 +213,8 @@ class droneClient(object):
                     avoidance_velocity += repulsive_force # add avoidance velocity to total
 
         # Calculate the exploration velocity based on the distance to the nearest unexplored point
-        exploration_velocity = (self.search_position - self.position) / np.linalg.norm(self.search_position - self.position)
-
+        exploration_velocity = np.array((self.search_position[:2] - self.position[:2]) / np.linalg.norm(self.search_position[:2] - self.position[:2]))
+        exploration_velocity = np.append(exploration_velocity, 0)
         new_velocity = []
         for i in range(len(self.velocity)):
             if i == 2:
@@ -159,22 +227,26 @@ class droneClient(object):
         # Check that the new position is within the boundaries of the search area
         estimate = self.position + new_velocity
 
-        for i in range(len(self.position)):
-            if estimate[i] < position_min:
+        for i in range(len(estimate)-1):
+            if estimate[i] < position_min[i]:
                 new_velocity[i] += random.uniform(0.5, 1)
-            elif estimate[i] > position_max:
+            elif estimate[i] > position_max[i]:
                 new_velocity[i] -= random.uniform(0.5, 1)
 
         if estimate[2] > -55:
                 new_velocity[2] -= random.uniform(0.5, 1)
 
-        if estimate[2] < -60:
-            new_velocity[2] += random.uniform(0.5, 1)
+        if lidar_check:
+            new_velocity[2] -= 2
+        else:
+            if estimate[2] < -255: #height boundary for simulation
+                new_velocity[2] += random.uniform(1, 1.5)
 
         self.velocity = new_velocity
 
     def position_update(self):
         self.position += self.velocity
+        self.pos_list.append(np.array(self.position))
 
 
 class PSO(object):
@@ -182,12 +254,20 @@ class PSO(object):
 
     def __init__(self):
         super(PSO, self).__init__()
-        self.position_min = -400
-        self.position_max = 400
+        self.position_min = []
+        self.position_max = []
         self.drone_list = []
         self.PSOclient = Client()
+        self.target = None
+        self.fitness_criterion = 10e-4
+        self.gbest_fitness = 0
+        self.gbest_pos = []
+        self.search_radius = 25
+        self.heightmap_generate()
         self.start()
         self.logic_control()
+
+
 
 
     def angle_calc(self, coordinates):
@@ -196,6 +276,47 @@ class PSO(object):
         if speed > 0:
             return math.degrees(math.atan2(vy, vx))
         return 0
+
+    def heightmap_generate(self):
+        # Load the heightmap from the PNG file
+        img = Image.open('map_large.png').convert('L')
+        heightmap = np.array(img)
+
+        # Smooth the heightmap using a Gaussian filter
+        self.heightmap = gaussian_filter(heightmap, sigma=3)
+        print(self.heightmap.shape)
+        self.position_min = [0,0]
+        self.position_max = [self.heightmap.shape[1],self.heightmap.shape[0]]
+        #Create a 3D plot
+        # fig = plt.figure(figsize=(10,10))
+        # ax = fig.add_subplot(projection='3d')
+        #
+        # # Set the x, y, and z limits
+        # xlen = self.heightmap.shape[1]
+        # ylen = self.heightmap.shape[0]
+        # x = np.linspace(0, xlen - 1, xlen)
+        # y = np.linspace(0, ylen - 1, ylen)
+        # X, Y = np.meshgrid(x, y)
+        # Z = self.heightmap #/ 255.0 # normalize the heights to [0,1]
+        #
+        # ax.set_xlim(0, xlen)
+        # ax.set_ylim(ylen, 0)
+        # ax.set_zlim(0, np.max(heightmap))
+        #
+        # # Create a surface plot
+        # surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+        #                        linewidth=0, antialiased=False, zorder=10,alpha=0.4)
+        #
+        # # Add a color bar
+        # #fig.colorbar(surf, shrink=0.5, aspect=5)
+        #
+        # # Set the scaling of the axes
+        # ax.set_box_aspect([1., 1, 0.2])
+        # ax.set_xlabel('X')
+        # ax.set_ylabel('Y')
+        # ax.set_zlabel('Height')
+        #
+        # return ax
 
     def detect_fire(self, image):
         # Convert the image to HSV color space
@@ -215,61 +336,120 @@ class PSO(object):
         # Apply a median blur to reduce noise
         mask = cv2.medianBlur(mask, 5)
         # Find contours in the mask
+        contours, _ = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        # Calculate the total area of the fire-like regions
+        if(len(contours) == 0):
+            return 0
+        else:
+            areas = [cv2.contourArea(contour) for contour in contours]
+            total_area = np.sum(areas)
+            largest_contour = max(contours, key=cv2.contourArea)
+            _, _, w, h = cv2.boundingRect(largest_contour)
+            score = total_area / (w * h)
+            return score
+
+    def show_fire(self, image):
+        # Convert the image to HSV color space
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        # Define the lower and upper bounds for the "fire" color
+        lower_red = np.array([0, 70, 50])
+        upper_red = np.array([10, 255, 255])
+        # Threshold the image to get the "fire" mask
+        mask1 = cv2.inRange(hsv, lower_red, upper_red)
+        # Define the lower and upper bounds for the "fire" color (again)
+        lower_red = np.array([170, 70, 50])
+        upper_red = np.array([180, 255, 255])
+        # Threshold the image to get the "fire" mask (again)
+        mask2 = cv2.inRange(hsv, lower_red, upper_red)
+        # Combine the two masks
+        mask = cv2.bitwise_or(mask1, mask2)
+        # Apply a median blur to reduce noise
+        mask = cv2.medianBlur(mask, 5)
+        # Find contours in the mask
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # Calculate the total area of the fire-like regions
+
         total_area = 0
+
         for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(image, (x, y), (x+w, y+h), (0, 0, 255), 2)
             area = cv2.contourArea(contour)
             total_area += area
 
+        largest_contour = max(contours, key=cv2.contourArea)
+        _,_,w,h = cv2.boundingRect(largest_contour)
+        score = total_area / (w*h)
 
-        if(len(contours) == 0):
-            score = 0
-        else:
-            largest_contour = max(contours, key=cv2.contourArea)
-            _,_,w,h = cv2.boundingRect(largest_contour)
-            score = total_area / (w*h)
-        print(score)
+
+        cv2.drawContours(image, [largest_contour], 0, (0, 255, 0), 2)
+
+        # Show the image with the boxes and the prediction score
+        cv2.putText(image, "Fire score: {:.2f}".format(score), (20, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        cv2.imshow("output", image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
 
     def start(self):
         #self.client.confirmConnection()
         id = "Drone"
-        for i in range(11):
+        for i in range(20):
             id = "Drone" + str(i+1)
             print(id)
             self.PSOclient.enableApiControl(True, id)
             newDrone = droneClient(id, i+1)
             self.drone_list.append(newDrone)
 
-        innit_pose = [0,0,0]
-        for drone in self.drone_list:
-            self.PSOclient.simSetVehiclePose(innit_pose, drone.droneID)
-            innit_pose[1] += 2
 
-        time.sleep(2)
-        for i in self.drone_list:
-            self.PSOclient.takeoffAsync(i.droneID)
-            ##possible future error? f1.join() https://microsoft.github.io/AirSim/apis/
-            #will lauch in order not at the same time (drone 2 will wait for drone1 is done until launching itself)
-            # state = self.PSOclient.getMultirotorState(i.droneID)
-        time.sleep(3)
+        drone_pose = [0,-10,-2]
+        for batch in range(2):
+            start = batch * 10
+            end = (batch + 1) * 10
+            for i, drone in enumerate(self.drone_list[start:end]):
+                drone_pose[1] += 2
+                self.PSOclient.simSetVehiclePose(drone_pose, drone.droneID)
+                time.sleep(0.21)
+                if drone.droneNumID == end:
+                    time.sleep(2)
+
+        print("pose done")
+        for batch in range(2):
+            start = batch * 10
+            end = (batch + 1) * 10
+            for i, drone in enumerate(self.drone_list[start:end]):
+                self.PSOclient.takeoffAsync(drone.droneID)
+                time.sleep(0.1)
+                if drone.droneNumID == end:
+                    time.sleep(2)
+
+        time.sleep(1)
         # print(self.PSOclient.getLidarData(self.drone_list[0].droneID, self.drone_list[0].droneNumID))
         # time.sleep(1)
 
-        for i in self.drone_list:
-            i.home_position = self.PSOclient.getMultirotorState(i.droneID).kinematics_estimated.position
-            print(i.home_position)
+        for i, drone in enumerate(self.drone_list):
+            drone.home_position = self.PSOclient.getMultirotorState(drone.droneID).kinematics_estimated.position
+            print(drone.home_position)
+            time.sleep(0.1)
         #=
 
-        print("flying to z = -55")
+        time.sleep(2)
+
         target_innitHeight = -55
-        separation = 0
-        for i in self.drone_list:
-            thread = self.PSOclient.moveToPositionAsync([0, separation, target_innitHeight], 25, self.angle_calc(i.position), i.droneID)
-            separation += 2
-            if i.droneNumID == len(self.drone_list):
-                print("yes")
-                thread.join()
+        init_height = [0, -10, -55]
+
+        for batch in range(2):
+            start = batch * 10
+            end = (batch + 1) * 10
+            for i, drone in enumerate(self.drone_list[start:end]):
+                init_height[1] += 2
+                init_height[2] += 2
+                thread = self.PSOclient.moveToPositionAsync(init_height, 25, self.angle_calc(drone.position), drone.droneID)
+                if drone.droneNumID == end:
+                    thread.join()
+                    #time.sleep(4)
 
         time.sleep(1)
 
@@ -280,38 +460,43 @@ class PSO(object):
             z = position.z_val
             i.position =  np.array([x, y, z])
             self.PSOclient.simSetTraceLine(i.droneID)
+            time.sleep(0.1)
 
-        time.sleep(1)
+        time.sleep(2.5)
 
-    def get_square_centers(self, min_val, max_val, divisions):
+
+    def get_square_centers(self, min_coord, max_coord, divisions):
         # Calculate the width and height of each square
-        width = max_val - min_val
+        width = max_coord[0] - min_coord[0]
+        height = max_coord[1] - min_coord[1]
 
-        square_width = width // divisions
+        rect_width = width // divisions
+        rect_height = height // divisions
 
-        # Calculate the coordinates of the top left corner of the first square
-        x_offset = square_width // 2
-        y_offset = square_width // 2
-        # Create a list to store the square center coordinates
-        square_centers = []
-        best_fit = None
-        # Iterate over each row and column to calculate the center of each square
+        # Calculate the coordinates of the top left corner of the first rectangle
+        x_offset = rect_width // 2 + min_coord[0]
+        y_offset = rect_height // 2 + min_coord[1]
+
+        # Create a list to store the rectangle center coordinates
+        rect_centers = []
+
+        # Iterate over each row and column to calculate the center of each rectangle
         for row in range(divisions):
             for col in range(divisions):
-                x = col * square_width + x_offset + min_val
-                y = row * square_width + y_offset + min_val
+                x = (row * rect_width + x_offset)
+                y = (col * rect_height + y_offset)
                 z = -55
-                new_point = [x,y,z]
-                square_centers.append(new_point)
+                new_point = [float(x),float(y), float(z)]
+                rect_centers.append(new_point)
 
-        return square_centers
+        return rect_centers
 
     def explored_check(self):
         explored_points = set()
         unexplored_points = []
         for drone in self.drone_list:
             for point in self.centres:
-                if np.linalg.norm(drone.position - point) < 25:
+                if np.linalg.norm(drone.position[:2] - point[:2]) < 15: # if within 15m of the waypoint, assume this location has been checked.
                     explored_points.add(tuple(point))
 
         for p in self.centres:
@@ -329,31 +514,46 @@ class PSO(object):
                 if tuple(point) not in currently_exploring:
                     candidates.append(point)
 
-            if not candidates:
-                min_dists = np.array([np.linalg.norm(drone.position - point) for point in self.centres])
+            if not candidates: #if no available candidates then select closest even if already pursued by other drone
+                min_dists = np.array([np.linalg.norm(drone.position[:2] - point[:2]) for point in self.centres])
                 min_index = np.argmin(min_dists)
                 drone.search_position = self.centres[min_index]
             else:
-                min_dists = np.array([np.linalg.norm(drone.position - point) for point in candidates])
+                min_dists = np.array([np.linalg.norm(drone.position[:2] - point[:2]) for point in candidates])
                 min_index = np.argmin(min_dists)
                 drone.search_position = candidates[min_index]
                 currently_exploring.add(tuple(candidates[min_index]))
 
 
     def explore(self):
+        print("explore logic")
         flag = False
         for t in range(250):
+            print(t)
             if flag:
                 print(t)
                 break
             self.drone_explore_position()
             for drone in self.drone_list:
-                drone.velocity_update_explore(self.drone_list, self.centres, self.position_min, self.position_max)
+                drone.velocity_update_explore(self.drone_list, self.centres, self.position_min, self.position_max, self.PSOclient.getLidarData(drone.droneID, drone.droneNumID))
                 drone.position_update()
                 thread = self.PSOclient.moveToPositionAsync(drone.position, 5, self.angle_calc(drone.velocity), drone.droneID)
                 #take image
                 if drone.droneNumID == len(self.drone_list):
                     thread.join()
+
+            for drone in self.drone_list:
+                image = self.PSOclient.takedroneimage(drone.droneNumID, drone.droneID)
+                score = self.detect_fire(image)
+                if score > 0:
+                    print('fire_detected')
+                    self.show_fire(image)
+                    self.target = drone.position
+                    print(self.target)
+                    flag = True
+                    break
+
+            print("\r" + str(len(self.centres)), end = " ")
 
             self.explored_check()
             if len(self.centres) == 0:
@@ -361,14 +561,62 @@ class PSO(object):
                 flag = True
                 break
 
+    def single_step(self):
+        for i in self.centres:
+            thread = self.PSOclient.moveToPositionAsync(i, 5, self.angle_calc([0,0,0]), "Drone1")
+            thread.join()
+
+
+
     def logic_control(self):
+
         print("start logic")
-        self.centres = self.get_square_centers(self.position_min, self.position_max, 20)
+        print(self.position_min, self.position_max)
+        self.centres = self.get_square_centers(self.position_min, self.position_max, 10)
         #self.explore()
+        # print("end explore")
+        # if self.target != None:
+        #     self.run()
+
+
+    def run(self):
+        print('running')
+        self.generation = 100
 
         for drone in self.drone_list:
-            image = self.PSOclient.takedroneimage(drone.droneNumID, drone.droneID)
-            self.detect_fire(image)
+            drone.local_search()
+
+        for drone in self.drone_list:
+            drone.fitness_calculation(self.target, self.search_radius)
+
+        fitness = [drone.fitness for drone in self.drone_list]
+        best_index = np.argmin(fitness)
+        self.gbest_fitness = fitness[best_index]
+        self.gbest_pos = self.drone_list[best_index].position
+        print(self.gbest_fitness, self.gbest_pos)
+
+        for t in range(self.generation):
+            print(t)
+            if np.average([drone.fitness for drone in self.drone_list]) <= self.fitness_criterion:
+                print("fit ", t)
+                break
+            else:
+                for drone in self.drone_list:
+                    drone.fitness_calculation(self.target, self.search_radius)
+                    drone.velocity_update(self.drone_list, self.gbest_pos, self.PSOclient.getLidarData(drone.droneID, drone.droneNumID))
+                    drone.position_update()
+                    thread = self.PSOclient.moveToPositionAsync(drone.position, 5, self.angle_calc(drone.velocity), drone.droneID)
+                    time.sleep(0.1)
+                    #take image
+                    if drone.droneNumID == len(self.drone_list):
+                        thread.join()
+
+
+                fitness = [drone.fitness for drone in self.drone_list]
+                best_index = np.argmin(fitness)
+                self.gbest_fitness = fitness[best_index]
+                self.gbest_pos = self.drone_list[best_index].position
+
 
     def track_orbits(self, angle):
         diff = abs(angle - self.start_angle)
@@ -450,12 +698,6 @@ class PSO(object):
                 print("completed {} orbits".format(count))
 
             self.PSOclient.moveByVelocityZAsync(vx, vy, -25, 2, airsim.DrivetrainType.MaxDegreeOfFreedom, airsim.YawMode(False, camera_heading), "Drone2")
-
-
-
-
-    def run(self):
-        print("run")
 
     def psoUpdate(self):
         for _ in range(0,50):
