@@ -2,6 +2,7 @@
   "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/main/docs/settings.md",
   "SettingsVersion": 1.2,
   "SimMode": "Multirotor",
+  "EnableCollisionPassthrogh": true,
   "CameraDefaults": {
     "CaptureSettings": [
       {
@@ -21,7 +22,7 @@
     ],
     "Gimbal": {
       "Stabilization": 0,
-      "Pitch": -45
+      "Pitch": -75
     }
   },
   "ClockSpeed": 1.0,
@@ -46,20 +47,11 @@
             }
           ],
           "X": 0, "Y": 0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
       "Sensors": {
-              "Distance1": {
-                "SensorType": 5,
-                "Enabled" : true,
-                "MinDistance": 2,
-                "MaxDistance": 5,
-                "X": 0, "Y": 0, "Z": -0.5,
-                "Yaw": 0, "Pitch": 0, "Roll": 0,
-                "DrawDebugPoints": true
-              },
-                "LidarSensor1": {
+                "l1": {
                   "SensorType": 6,
                   "Enabled": true,
                   "Range": 20,
@@ -100,9 +92,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l2": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone3": {
@@ -126,9 +136,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l3": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone4": {
@@ -152,9 +180,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch":-45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch":-75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l4": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone5": {
@@ -178,9 +224,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l5": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone6": {
@@ -204,9 +268,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l6": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone7": {
@@ -230,9 +312,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l7": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone8": {
@@ -256,9 +356,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l8": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone9": {
@@ -282,9 +400,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l9": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone10": {
@@ -308,9 +444,27 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l10": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     },
     "Drone11": {
@@ -334,9 +488,423 @@
             }
           ],
           "X": 0, "Y": 0.0, "Z": 0.8,
-          "Pitch": -45, "Roll": 0.0, "Yaw": 0.0
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
         }
       },
+      "Sensors": {
+                "l11": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone12": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f12": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l12": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone13": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f13": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l13": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone14": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f14": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l14": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone15": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f15": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l15": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone16": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f16": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l16": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone17": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f17": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l17": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone18": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f18": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l18": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone19": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f19": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l19": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
+      "X": 8, "Y": 0 , "Z": 0
+    },
+    "Drone20": {
+      "VehicleType": "SimpleFlight",
+      "Cameras": {
+        "f20": {
+          "CaptureSettings": [
+            {
+              "ImageType": 0,
+              "Width": 672,
+              "Height": 376,
+              "FOV_Degrees": 120,
+              "AutoExposureSpeed": 1000,
+              "AutoExposureBias": 0,
+              "AutoExposureMaxBrightness": 0.64,
+              "AutoExposureMinBrightness": 0.03,
+              "MotionBlurAmount": 0,
+              "TargetGamma": 1.0,
+              "ProjectionMode": "",
+              "OrthoWidth": 5.12
+            }
+          ],
+          "X": 0, "Y": 0.0, "Z": 0.8,
+          "Pitch": -75, "Roll": 0.0, "Yaw": 0.0
+        }
+      },
+      "Sensors": {
+                "l20": {
+                  "SensorType": 6,
+                  "Enabled": true,
+                  "Range": 20,
+                  "NumberofChannels": 1,
+                  "RotationsPerSecond": 10,
+                  "PointsPerSecond": 100,
+                  "X": 0, "Y":0, "Z": -1,
+                  "Roll": 0, "Pitch": 0, "Yaw": 0,
+                  "VerticalFOVUpper": -89,
+                  "VerticalFOVLower": -92,
+                  "HorizontalFOVStart": 0,
+                  "HorizontalFOVEnd": 359,
+                  "DrawDebugPoints": true,
+                  "DataFrame": "SensorLocalFrame"
+                }
+              },
       "X": 8, "Y": 0 , "Z": 0
     }
   }
